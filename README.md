@@ -1,1 +1,1 @@
-# COVID_PR
+# Covid PR
