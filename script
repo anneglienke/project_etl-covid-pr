@@ -1,0 +1,30 @@
+!pip install requests
+
+from datetime import datetime, timedelta, timezone
+import requests as req
+import pandas as pd 
+import sqlalchemy
+import csv, json
+import sqlite3
+
+DATABASE_LOCATION = "sqlite:///COVID_PR.sqlite"
+
+# Extract CSV
+
+if __name__ == "__main__":
+
+  today = datetime.today()
+  yesterday = today - timedelta(days=1)
+  year = yesterday.year
+  month = yesterday.month
+  day = yesterday.day
+  yyyymm = str(year)+"-"+str(month)
+  ddmm = str(day)+"_"+str(month)
+  
+  path = f'https://www.saude.pr.gov.br/sites/default/arquivos_restritos/files/documento/{yyyymm}/informe_epidemiologico_{ddmm}_obitos_casos_municipio.csv'
+  
+  df = pd.read_csv(path,sep=';')
+
+  data_PR = pd.DataFrame(df, columns=["IBGE","RS","MACRO","Municipios","Casos","Obitos","Recuperados","Em_investigacao"])
+
+  #print(data_PR)
