@@ -13,18 +13,27 @@ DATABASE_LOCATION = "sqlite:///COVID_PR.sqlite"
 
 if __name__ == "__main__":
 
+ # Date
   today = datetime.today()
-  yesterday = today - timedelta(days=1)
+  yesterday = today - timedelta(days=3,hours=3)
   year = yesterday.year
   month = yesterday.month
   day = yesterday.day
   yyyymm = str(year)+"-"+str(month)
   ddmm = str(day)+"_"+str(month)
-  
+
+  utc = yesterday - timedelta(hours=3)
+  date = utc.strftime("%x")
+
+  # Path
   path = f'https://www.saude.pr.gov.br/sites/default/arquivos_restritos/files/documento/{yyyymm}/informe_epidemiologico_{ddmm}_obitos_casos_municipio.csv'
   
   df = pd.read_csv(path,sep=';')
 
-  data_PR = pd.DataFrame(df, columns=["IBGE","RS","MACRO","Municipios","Casos","Obitos","Recuperados","Em_investigacao"])
+  # Index
+  df["Date"] = date
+  df.set_index("Date", inplace=True)
 
+  data_PR = pd.DataFrame(df, columns=["IBGE","RS","MACRO","Municipios","Casos","Obitos","Recuperados","Em_investigacao"])
+ 
   #print(data_PR)
