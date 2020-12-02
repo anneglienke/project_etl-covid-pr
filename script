@@ -37,6 +37,29 @@ if __name__ == "__main__":
  
   #print(data_PR)
 
+# Define validation function
+
+def check_if_valid_data(df: pd.DataFrame) -> bool:
+    # Check if df is empty
+    if data_PR.empty:
+        print("No data downloaded")
+        return False
+
+    # Check for duplicates
+    if pd.Series(data_PR["Municipios"],data_PR.index).is_unique:
+        pass
+    else:
+        raise Exception("Duplicated primary key")
+
+    # Check for nulls
+    if data_PR.isnull().values.any():
+        raise Exception("Null value found")
+
+# Validate
+
+if check_if_valid_data(data_PR):
+    print("Valid data")
+
 # Load
 engine = sqlalchemy.create_engine(DATABASE_LOCATION)
 conn = sqlite3.connect('COVID_PR.db')
