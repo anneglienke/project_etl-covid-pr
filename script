@@ -22,8 +22,7 @@ if __name__ == "__main__":
   yyyymm = str(year)+"-"+str(month)
   ddmm = str(day)+"_"+str(month)
 
-  utc = yesterday - timedelta(hours=3)
-  date = utc.strftime("%x")
+  date = yesterday.strftime("%x")
 
   # Path
   path = f'https://www.saude.pr.gov.br/sites/default/arquivos_restritos/files/documento/{yyyymm}/informe_epidemiologico_{ddmm}_obitos_casos_municipio.csv'
@@ -37,3 +36,27 @@ if __name__ == "__main__":
   data_PR = pd.DataFrame(df, columns=["IBGE","RS","MACRO","Municipios","Casos","Obitos","Recuperados","Em_investigacao"])
  
   #print(data_PR)
+
+# Load
+engine = sqlalchemy.create_engine(DATABASE_LOCATION)
+conn = sqlite3.connect('COVID_PR.db')
+cursor = conn.cursor()
+
+# Define tables - Insert date index
+
+sql_query = """
+CREATE TABLE IF NOT EXISTS COVID_PR( 
+    IBGE VARCHAR(15), 
+    RS VARCHAR(10), 
+    MACRO VARCHAR(10), 
+    Municipios VARCHAR(100), 
+    Casos INT, 
+    Obitos INT, 
+    Recuperados INT, 
+    Em_investigacao INT,
+    CONSTRAINT primary_key_constraint PRIMARY KEY (Municipios)
+)
+"""
+
+cursor.execute(sql_query)
+print("Open database successfully")
