@@ -1,43 +1,63 @@
 !pip install requests
-
 import requests as req
 import pandas as pd 
 from datetime import datetime, timedelta, timezone
 import sqlalchemy
 import sqlite3
 
-DATABASE_LOCATION = "sqlite:///COVID_PR.sqlite"
+DATABASE_LOCATION = "sqlite:///COVID_PR_Completo.sqlite"
+
+# Date
+today = datetime.today()
+yesterday = today - timedelta(days=3,hours=3)
+yyyymm = str(yesterday.year)+"-"+str(yesterday.month)
+ddmm = str(yesterday.day)+"_"+str(yesterday.month)
+
+date = yesterday.strftime("%x")
+
+start_date = today - timedelta(days=90)
+delta = timedelta(days=1)
+
+#while start_date <= today:
+    #run script
+#    start_date += delta
 
 # Extract CSV
 
 if __name__ == "__main__":
 
- # Date
-  today = datetime.today()
-  yesterday = today - timedelta(days=3,hours=3)
-  year = yesterday.year
-  month = yesterday.month
-  day = yesterday.day
-  yyyymm = str(year)+"-"+str(month)
-  ddmm = str(day)+"_"+str(month)
-
-  date = yesterday.strftime("%x")
-
   # Path
-  path = f'https://www.saude.pr.gov.br/sites/default/arquivos_restritos/files/documento/{yyyymm}/informe_epidemiologico_{ddmm}_obitos_casos_municipio.csv'
+  informe = "informe_epidemiologico" #variation INFORME_EPIDEMIOLOGICO
+  geral = "geral" #variation GERAL
+  path = f'https://www.saude.pr.gov.br/sites/default/arquivos_restritos/files/documento/{yyyymm}/{informe}_{ddmm}_{geral}.csv'
   
+  # DataFrame
   df = pd.read_csv(path,sep=';')
 
   # Index
-  df["Date"] = date
-  df.set_index("Date", inplace=True)
+  df["Extraido_em"] = date
+  df.set_index("Extraido_em", inplace=True)
 
-  data_PR = pd.DataFrame(df, columns=["IBGE","RS","MACRO","Municipios","Casos","Obitos","Recuperados","Em_investigacao"])
+  data_PR = pd.DataFrame(df,columns=["IBGE_RES_PR",
+                                     "IBGE_ATEND_PR",
+                                     "SEXO",
+                                     "IDADE_ORIGINAL",
+                                     "MUN_RESIDENCIA",
+                                     "MUN_ATENDIMENTO",
+                                     "LABORATORIO",
+                                     "DATA_DIAGNOSTICO",
+                                     "DATA_CONFIRMACAO_DIVULGACAO",
+                                     "DATA_INICIO_SINTOMAS",
+                                     "OBITO",
+                                     "DATA_OBITO",
+                                     "DATA_OBITO_DIVULGACAO",
+                                     "STATUS",
+                                     "DATA_RECUPERADO_DIVULGACAO",
+                                     "FONTE_DADO_RECUPERADO"])
  
   #print(data_PR)
 
 # Define validation function
-
 def check_if_valid_data(df: pd.DataFrame) -> bool:
     # Check if df is empty
     if data_PR.empty:
@@ -55,37 +75,43 @@ def check_if_valid_data(df: pd.DataFrame) -> bool:
         raise Exception("Null value found")
 
 # Validate
-
 if check_if_valid_data(data_PR):
     print("Valid data")
 
 # Load
 engine = sqlalchemy.create_engine(DATABASE_LOCATION)
-conn = sqlite3.connect('COVID_PR.db')
+conn = sqlite3.connect('COVID_PR_Completo.db')
 cursor = conn.cursor()
 
 # Define tables - Insert date index
-
 sql_query = """
-CREATE TABLE IF NOT EXISTS COVID_PR( 
-    IBGE VARCHAR(15), 
-    RS VARCHAR(10), 
-    MACRO VARCHAR(10), 
-    Municipios VARCHAR(100), 
-    Casos INT, 
-    Obitos INT, 
-    Recuperados INT, 
-    Em_investigacao INT,
-    CONSTRAINT primary_key_constraint PRIMARY KEY (Municipios)
+CREATE TABLE IF NOT EXISTS COVID_PR_Completo( 
+  IBGE_RES_PR VARCHAR(15),
+  IBGE_ATEND_PR VARCHAR(15),
+  SEXO VARCHAR(5),
+  IDADE_ORIGINAL INTEGER,
+  MUN_RESIDENCIA VARCHAR(30),
+  MUN_ATENDIMENTO VARCHAR(30),
+  LABORATORIO VARCHAR(50),
+  DATA_DIAGNOSTICO TEXT,
+  DATA_CONFIRMACAO_DIVULGACAO TEXT,
+  DATA_INICIO_SINTOMAS TEXT,
+  OBITO VARCHAR(5),
+  DATA_OBITO TEXT,
+  DATA_OBITO_DIVULGACAO TEXT,
+  STATUS VARCHAR(30),
+  DATA_RECUPERADO_DIVULGACAO TEXT,
+  FONTE_DADO_RECUPERADO VARCHAR(50)
 )
 """
+#CONSTRAINT primary_key_constraint PRIMARY KEY (Municipios) 
 
 cursor.execute(sql_query)
 print("Open database successfully")
 
 # Insert data from dataframe to sql database
 try: 
-    data_PR.to_sql("COVID_PR", engine, index=False, if_exists='append')
+    data_PR.to_sql("COVID_PR_Completo", engine, index=True, if_exists='append')
 except:
     print("Data already exists in the database")
 
