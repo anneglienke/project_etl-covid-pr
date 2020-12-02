@@ -1,10 +1,9 @@
 !pip install requests
 
-from datetime import datetime, timedelta, timezone
 import requests as req
 import pandas as pd 
+from datetime import datetime, timedelta, timezone
 import sqlalchemy
-import csv, json
 import sqlite3
 
 DATABASE_LOCATION = "sqlite:///COVID_PR.sqlite"
