@@ -83,3 +83,12 @@ CREATE TABLE IF NOT EXISTS COVID_PR(
 
 cursor.execute(sql_query)
 print("Open database successfully")
+
+# Insert data from dataframe to sql database
+try: 
+    data_PR.to_sql("COVID_PR", engine, index=False, if_exists='append')
+except:
+    print("Data already exists in the database")
+
+conn.close()
+print("Close database successfully")
