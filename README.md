@@ -4,9 +4,10 @@ This is a data repository for COVID-19 related information (cases, deaths, demog
 
 | File                          | Description                                                                     |
 |-------------------------------|---------------------------------------------------------------------------------|
-| script.ipynb                  | script (extracts the data, transforms it and load it to a SQLite database       |
-| covid-pr.db                   | SQLite database template created by the script                                  |
-| covid-pr.rar                  | sample of the data insert into SQLite database created by the script            |
+| covid_etl.py                  | script (extracts the data, transforms it and load it to a SQLite database)      |
+| covid_dag.py                  | script that creates airflow dag                                                 |
+| covid_pr.db                   | SQLite database template created by covid_etl.py                                |
+| covid_pr.rar                  | sample of the data insert into SQLite database created by the covid_etl.py      |
 
 
 Data source: https://www.saude.pr.gov.br/Pagina/Coronavirus-COVID-19
