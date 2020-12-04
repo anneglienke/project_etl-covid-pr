@@ -6,7 +6,7 @@ This is a data repository for COVID-19 related information (cases, deaths, demog
 |-------------------------------|---------------------------------------------------------------------------------|
 | covid_etl.py                  | script (extracts the data, transforms it and load it to a SQLite database)      |
 | covid_dag.py                  | script that creates airflow dag                                                 |
-| covid_pr.db                   | SQLite database template created by covid_etl.py                                |
+| covid_pr_temp                 | SQLite database template created by covid_etl.py                                |
 | covid_pr.rar                  | sample of the data insert into SQLite database created by the covid_etl.py      |
 
 
