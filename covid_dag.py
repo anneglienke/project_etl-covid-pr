@@ -32,4 +32,4 @@ run_etl = PythonOperator(
     dag=dag,
 )
 
-run_covid_etl
+run_etl
