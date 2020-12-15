@@ -1,8 +1,10 @@
 import requests as req
 import pandas as pd 
-from datetime import datetime, timedelta, timezone
+from datetime import datetime
 import sqlalchemy
 import sqlite3
+import httplib2
+from bs4 import BeautifulSoup
 
 def run_covid_etl(): 
 
@@ -10,28 +12,31 @@ def run_covid_etl():
     
     if __name__ == "__main__":
 
-        # Builds path
-        today = datetime.today()
-        yesterday = today - timedelta(days=1,hours=3)
-        yyyymm = str(yesterday.year)+"-"+str(yesterday.month)
-        ddmm = str(yesterday.day)+"_"+str(yesterday.month)
-        date = yesterday.strftime("%x")
+        http = httplib2.Http()
+        status, response = http.request('https://www.saude.pr.gov.br/Pagina/Coronavirus-COVID-19')
+        soup = BeautifulSoup(response)
 
-        informe = ['informe_epidemiologico','INFORME_EPIDEMIOLOGICO']
+        result = []
         geral = ['geral','GERAL','Geral']
 
-        for i in informe:
+        for link in soup.find_all('a', href=True):
+            if '.csv' in link['href']: 
+                result.append(link['href'])
+
+        for results in result:
             for g in geral: 
                 try:
-                    path = f'https://www.saude.pr.gov.br/sites/default/arquivos_restritos/files/documento/{yyyymm}/{i}_{ddmm}_{g}.csv'
-                    # Reads .csv
+                    path = results
                     df = pd.read_csv(path,sep=';')
+                    print(df)
                 except Exception as e:
                     print(e)
-
-        # Creates index based on date
-        df["Extraido_em"] = date
-        df.set_index("Extraido_em", inplace=True)
+        
+        # Creates index based on date        
+        today = datetime.today()
+        date = today.strftime("%x")
+        df["DATA_EXTRACAO_UTC"] = date
+        df.set_index("DATA_EXTRACAO_UTC", inplace=True)
 
         # Creates a dataframe
         data_PR = pd.DataFrame(df,columns=["IBGE_RES_PR",
